@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Amemiya • Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+<div class="auth-card">
+<div class="brand auth-brand"><img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img"></div>
+<h1 class="auth-title">Bem-vindo de volta!</h1>
+<form id="loginForm" class="auth-form">
+<label>E-mail</label>
+<input class="input" type="email" name="email" placeholder="seu@email.com" required>
+<label>Senha</label>
+<input class="input" type="password" name="password" placeholder="••••••••" required>
+<button class="btn w-full" type="submit">Entrar</button>
+<p class="auth-alt">Não tem conta? <a href="register-step1.html">Cadastre-se</a></p>
+<p class="auth-error" id="loginError"></p>
+</form>
+</div>
+<script src="js/auth.js"></script>
+</body>
+</html>
