@@ -1,26 +1,65 @@
 <?php
-header('Content-Type: application/json');
 require 'db.php';
-$in = json_decode(file_get_contents('php://input'), true);
-$name = trim($in['name'] ?? '');
-$company = trim($in['company'] ?? '');
-$address = trim($in['address'] ?? '');
-$cpf = preg_replace('/\D/','', $in['cpf'] ?? '');
-$birthdate = $in['birthdate'] ?? null;
-$email = strtolower(trim($in['email'] ?? ''));
-$pass = $in['password'] ?? '';
+header('Content-Type: application/json');
 
+$input = json_decode(file_get_contents('php://input'), true);
 
-if(!$name||!$company||!$address||!$cpf||!$birthdate||!$email||!$pass){ http_response_code(400); echo json_encode(['error'=>'Campos obrigatórios ausentes']); exit; }
-if(!filter_var($email, FILTER_VALIDATE_EMAIL)){ http_response_code(400); echo json_encode(['error'=>'E-mail inválido']); exit; }
-if(strlen($pass) < 6){ http_response_code(400); echo json_encode(['error'=>'Senha muito curta']); exit; }
+$nome          = trim($input['nome_completo'] ?? '');
+$empresa       = trim($input['empresa'] ?? '');
+$endereco      = trim($input['endereco'] ?? '');
+$cpf           = preg_replace('/\D/', '', $input['cpf'] ?? '');
+$data_nasc     = $input['data_nascimento'] ?? null;
+$email         = strtolower(trim($input['email'] ?? ''));
+$senha         = $input['senha'] ?? '';
 
+if (!$nome || !$email || !$senha) {
+    http_response_code(400);
+    echo json_encode(['erro' => 'Nome, e-mail e senha são obrigatórios.']);
+    exit;
+}
 
-$st=$pdo->prepare('SELECT id FROM users WHERE email=:e'); $st->execute(['e'=>$email]); if($st->fetch()){ http_response_code(400); echo json_encode(['error'=>'E-mail já cadastrado']); exit; }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['erro' => 'E-mail inválido.']);
+    exit;
+}
 
+if (strlen($senha) < 6) {
+    http_response_code(400);
+    echo json_encode(['erro' => 'Senha deve ter pelo menos 6 caracteres.']);
+    exit;
+}
 
-$hash = password_hash($pass, PASSWORD_DEFAULT);
-$pdo->prepare('INSERT INTO users(name,email,password_hash,org_id,role,status,company,address,cpf,birthdate,created_at) VALUES(:n,:e,:h,1,\'OrgAdmin\',\'active\',:c,:a,:cpf,:b,NOW())')
-->execute(['n'=>$name,'e'=>$email,'h'=>$hash,'c'=>$company,'a'=>$address,'cpf'=>$cpf,'b'=>$birthdate]);
-$_SESSION['uid'] = $pdo->lastInsertId(); $_SESSION['email']=$email; $_SESSION['name']=$name;
-echo json_encode(['ok'=>true]);
+$stmt = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :email");
+$stmt->execute(['email' => $email]);
+
+if ($stmt->fetch()) {
+    http_response_code(400);
+    echo json_encode(['erro' => 'E-mail já cadastrado.']);
+    exit;
+}
+
+$hash = password_hash($senha, PASSWORD_DEFAULT);
+
+$stmt = $pdo->prepare("
+    INSERT INTO usuarios
+    (nome_completo, email, senha_hash, cpf, empresa, endereco, data_nascimento, perfil, ativo)
+    VALUES
+    (:nome, :email, :hash, :cpf, :empresa, :endereco, :data_nasc, 'GESTOR', 1)
+");
+
+$stmt->execute([
+    'nome'      => $nome,
+    'email'     => $email,
+    'hash'      => $hash,
+    'cpf'       => $cpf ?: null,
+    'empresa'   => $empresa ?: null,
+    'endereco'  => $endereco ?: null,
+    'data_nasc' => $data_nasc ?: null
+]);
+
+$_SESSION['id_usuario'] = $pdo->lastInsertId();
+$_SESSION['nome']       = $nome;
+$_SESSION['email']      = $email;
+
+echo json_encode(['sucesso' => true]);
