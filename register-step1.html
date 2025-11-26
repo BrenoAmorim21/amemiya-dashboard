@@ -1,32 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Amemiya • Cadastro (1/2)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Amemiya • Criar conta 1 de 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="auth-body">
-<div class="auth-card">
-<div class="brand auth-brand"><img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img"></div>
-<h1 class="auth-title">Criar conta — 1 de 2</h1>
-<form id="step1Form" class="auth-form">
-<label>Nome completo</label>
-<input class="input" type="text" name="name" required>
-<label>Empresa</label>
-<input class="input" type="text" name="company" required>
-<label>Endereço</label>
-<input class="input" type="text" name="address" required>
-<label>CPF</label>
-<input class="input" type="text" name="cpf" placeholder="000.000.000-00" required>
-<label>Data de nascimento</label>
-<input class="input" type="date" name="birthdate" required>
-<button class="btn w-full" type="submit">Continuar</button>
-<p class="auth-alt">Já tem conta? <a href="index.html">Entrar</a></p>
-<p class="auth-error" id="step1Error"></p>
-</form>
-</div>
-<script src="js/auth.js"></script>
+  <div class="auth-card">
+    <div class="brand auth-brand">
+      <img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img">
+    </div>
+
+    <h1 class="auth-title">Criar conta — 1 de 2</h1>
+
+    <form id="step1Form" class="auth-form">
+      <label>Nome completo</label>
+      <input class="input" type="text" name="nome_completo" placeholder="Seu nome" required>
+
+      <label>Empresa</label>
+      <input class="input" type="text" name="empresa" placeholder="Nome da empresa">
+
+      <label>Endereço</label>
+      <input class="input" type="text" name="endereco" placeholder="Rua, número, bairro">
+
+      <label>CPF</label>
+      <input class="input" type="text" name="cpf" placeholder="Somente números">
+
+      <label>Data de nascimento</label>
+      <input class="input" type="date" name="data_nascimento">
+
+      <button class="btn w-full" type="submit">Continuar</button>
+
+      <p class="auth-alt">Já tem conta? <a href="index.html">Entrar</a></p>
+    </form>
+  </div>
+
+  <script src="js/auth.js"></script>
 </body>
 </html>

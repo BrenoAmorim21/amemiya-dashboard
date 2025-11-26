@@ -8,86 +8,95 @@ if (!isset($_SESSION['id_usuario'])) {
     exit;
 }
 
-/* ===== KPIs ===== */
-
-// Gasto total
-$row = $pdo->query("SELECT SUM(valor_total) AS total FROM notas_fiscais")->fetch();
-$gasto_total = (float)($row['total'] ?? 0);
-
-// km total (onde tiver km_veiculo) – simplificado
-$row = $pdo->query("SELECT SUM(km_veiculo) AS km FROM notas_fiscais WHERE km_veiculo IS NOT NULL")->fetch();
-$km_total = (float)($row['km'] ?? 0);
-$custo_km = $km_total > 0 ? $gasto_total / $km_total : 0;
-
-// taxa de aprovação
-$stats = $pdo->query("
-    SELECT 
-      SUM(status = 'APROVADA') AS aprovadas,
-      COUNT(*) AS total
+/* ===== KPI: Gasto total ===== */
+$stmt = $pdo->query("
+    SELECT COALESCE(SUM(valor_total), 0) AS total
     FROM notas_fiscais
-")->fetch();
+");
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$gastoTotal = (float)$row['total'];
 
-$taxa_aprov = ($stats['total'] ?? 0) > 0
-  ? ($stats['aprovadas'] / $stats['total']) * 100
-  : 0;
+/* ===== KPI: Custo por km ===== */
+$stmt = $pdo->query("
+    SELECT 
+        COALESCE(SUM(valor_total), 0) AS total_gasto,
+        COALESCE(SUM(km_veiculo), 0) AS km_total
+    FROM notas_fiscais
+");
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// tempo médio de aprovação (em horas) – usando aprovacoes_nota
-$row = $pdo->query("
-    SELECT AVG(TIMESTAMPDIFF(HOUR, nf.criado_em, an.data_aprovacao)) AS media_horas
-    FROM notas_fiscais nf
-    JOIN aprovacoes_nota an ON an.id_nota = nf.id_nota
-    WHERE an.decisao = 'APROVADA'
-")->fetch();
-$media_horas = (float)($row['media_horas'] ?? 0);
+if ((float)$row['km_total'] > 0) {
+    $custoKm = (float)$row['total_gasto'] / (float)$row['km_total'];
+} else {
+    $custoKm = 0.0;
+}
 
-/* ===== Tendência de gastos por mês (linha) ===== */
+/* ===== KPI: Taxa de aprovação ===== */
+$stmt = $pdo->query("
+    SELECT 
+        SUM(status = 'APROVADA') AS aprovadas,
+        COUNT(*) AS total
+    FROM notas_fiscais
+");
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$meses = $pdo->query("
-    SELECT DATE_FORMAT(data_emissao, '%Y-%m') AS mes,
-           SUM(valor_total) AS total
+if ((int)$row['total'] > 0) {
+    $taxaAprov = ((int)$row['aprovadas'] / (int)$row['total']) * 100.0;
+} else {
+    $taxaAprov = 0.0;
+}
+
+/* ===== Tendência mensal (gráfico de linha) ===== */
+$stmt = $pdo->query("
+    SELECT 
+        DATE_FORMAT(data_emissao, '%Y-%m') AS mes,
+        SUM(valor_total) AS total
     FROM notas_fiscais
     WHERE data_emissao IS NOT NULL
     GROUP BY mes
     ORDER BY mes
-")->fetchAll();
+");
 
-$line_labels = [];
-$line_series = [];
-foreach ($meses as $m) {
-    $line_labels[] = $m['mes'];
-    $line_series[] = (float)$m['total'];
+$lineLabels = [];
+$lineSeries = [];
+foreach ($stmt as $r) {
+    $lineLabels[] = $r['mes'];
+    $lineSeries[] = (float)$r['total'];
 }
 
-/* ===== Pizza por categoria (tipo de manutenção) ===== */
-
-$cats = $pdo->query("
-    SELECT tm.nome AS categoria, SUM(nf.valor_total) AS total
-    FROM notas_fiscais nf
-    LEFT JOIN tipos_manutencao tm ON tm.id_tipo_manutencao = nf.id_tipo_manutencao
-    GROUP BY tm.nome
+/* ===== Gastos por categoria (pizza) ===== */
+$stmt = $pdo->query("
+    SELECT 
+        tm.nome AS categoria,
+        COALESCE(SUM(nf.valor_total), 0) AS total
+    FROM tipos_manutencao tm
+    LEFT JOIN notas_fiscais nf
+        ON nf.id_tipo_manutencao = tm.id_tipo_manutencao
+    GROUP BY tm.id_tipo_manutencao, tm.nome
     ORDER BY total DESC
-")->fetchAll();
+");
 
-$pie_labels = [];
-$pie_series = [];
-foreach ($cats as $c) {
-    $pie_labels[] = $c['categoria'] ?: 'Sem categoria';
-    $pie_series[] = (float)$c['total'];
+$pieLabels = [];
+$pieSeries = [];
+foreach ($stmt as $r) {
+    $pieLabels[] = $r['categoria'] ? $r['categoria'] : 'Sem categoria';
+    $pieSeries[] = (float)$r['total'];
 }
 
+/* ===== Resposta final ===== */
 echo json_encode([
     'kpis' => [
-        'gasto_total'      => $gasto_total,
-        'custo_km'         => $custo_km,
-        'taxa_aprovacao'   => round($taxa_aprov, 2),
-        'tempo_medio_horas'=> round($media_horas, 1)
+        'gasto_total'    => $gastoTotal,
+        'custo_km'       => round($custoKm, 4),
+        'taxa_aprovacao' => round($taxaAprov, 2),
+        // tempo médio p/ aprovar deixamos pra calcular depois
     ],
     'line' => [
-        'labels' => $line_labels,
-        'series' => $line_series
+        'labels' => $lineLabels,
+        'series' => $lineSeries,
     ],
     'pie' => [
-        'labels' => $pie_labels,
-        'series' => $pie_series
-    ]
+        'labels' => $pieLabels,
+        'series' => $pieSeries,
+    ],
 ]);

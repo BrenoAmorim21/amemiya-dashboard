@@ -9,7 +9,7 @@ if (!isset($_SESSION['id_usuario'])) {
 }
 
 echo json_encode([
-    'id_usuario' => $_SESSION['id_usuario'],
-    'nome'       => $_SESSION['nome'] ?? '',
-    'email'      => $_SESSION['email'] ?? ''
+    'id'    => $_SESSION['id_usuario'],
+    'name'  => $_SESSION['nome'] ?? '',
+    'email' => $_SESSION['email'] ?? ''
 ]);

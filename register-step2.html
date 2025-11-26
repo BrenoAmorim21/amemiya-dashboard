@@ -1,27 +1,37 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Amemiya • Cadastro (2/2)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Amemiya • Criar conta 2 de 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="auth-body">
-<div class="auth-card">
-<div class="brand auth-brand"><img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img"></div>
-<h1 class="auth-title">Criar conta — 2 de 2</h1>
-<form id="step2Form" class="auth-form">
-<label>E-mail</label>
-<input class="input" type="email" name="email" required>
-<label>Senha</label>
-<input class="input" type="password" name="password" minlength="6" required>
-<label>Confirmar senha</label>
-<input class="input" type="password" name="confirm" minlength="6" required>
-<button class="btn w-full" type="submit">Cadastrar</button>
-<p class="auth-alt">Já tem conta? <a href="index.html">Entrar</a></p>
-<p class="auth-error" id="step2Error"></p>
-</form>
-</div>
-<script src="js/auth.js"></script>
+  <div class="auth-card">
+    <div class="brand auth-brand">
+      <img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img">
+    </div>
+
+    <h1 class="auth-title">Criar conta — 2 de 2</h1>
+
+    <form id="step2Form" class="auth-form">
+      <label>E-mail</label>
+      <input class="input" type="email" name="email" placeholder="seu@email.com" required>
+
+      <label>Senha</label>
+      <input class="input" type="password" name="senha" minlength="6" required>
+
+      <label>Confirmar senha</label>
+      <input class="input" type="password" name="confirmar_senha" minlength="6" required>
+
+      <button class="btn w-full" type="submit">Cadastrar</button>
+
+      <p class="auth-alt">Já tem conta? <a href="index.html">Entrar</a></p>
+      <p class="auth-error" id="step2Error"></p>
+    </form>
+  </div>
+
+  <script src="js/auth.js"></script>
 </body>
 </html>

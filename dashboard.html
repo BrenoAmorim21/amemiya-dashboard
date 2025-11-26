@@ -12,7 +12,7 @@
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <img src="assets/logo_amemiya.png" alt="Amemiya" class="brand__img">
+        <img src="assets/logo_amemiya.png" class="brand__img" alt="Amemiya">
       </div>
       <nav class="nav">
         <a class="active" href="#">Dashboard</a>
@@ -22,13 +22,13 @@
         <a href="#">Admin</a>
         <a id="logout" class="logout" href="#">Sair</a>
       </nav>
-      <div class="foot">© <span id="year"></span> Amemiya • v0.1</div>
+      <div class="foot">© 2025 Amemiya • v0.1</div>
     </aside>
 
     <main class="main">
       <div class="topbar">
         <div class="search">
-          <input id="q" class="input" placeholder="Buscar (veículo, fornecedor, NF, categoria)…" />
+          <input id="q" class="input" placeholder="Buscar (veículo, fornecedor, ...)" />
           <input id="from" type="date" class="input" />
           <input id="to" type="date" class="input" />
           <button class="btn" id="apply">Aplicar</button>
@@ -38,33 +38,79 @@
       </div>
 
       <section class="kpis" id="kpis">
-        <div class="card"><h4>Gasto Total</h4><div class="value" id="kpi-total">—</div><span class="trend" id="kpi-total-trend">—</span></div>
-        <div class="card"><h4>Taxa de Aprovação</h4><div class="value" id="kpi-approve">—</div><span class="trend" id="kpi-approve-trend">—</span></div>
-        <div class="card"><h4>Custo por km</h4><div class="value" id="kpi-cpkm">—</div><span class="trend" id="kpi-cpkm-trend">—</span></div>
-        <div class="card"><h4>Tempo Médio p/ Aprovar</h4><div class="value" id="kpi-avg">—</div><span class="trend" id="kpi-avg-trend">—</span></div>
+        <div class="card">
+          <h4>Gasto Total</h4>
+          <div class="value" id="kpi-total">—</div>
+          <span class="trend" id="kpi-total-trend">—</span>
+        </div>
+        <div class="card">
+          <h4>Taxa de Aprovação</h4>
+          <div class="value" id="kpi-approve">—</div>
+          <span class="trend" id="kpi-approve-trend">—</span>
+        </div>
+        <div class="card">
+          <h4>Custo por km</h4>
+          <div class="value" id="kpi-cpkm">—</div>
+          <span class="trend" id="kpi-cpkm-trend">—</span>
+        </div>
+        <div class="card">
+          <h4>Tempo Médio p/ Aprovar</h4>
+          <div class="value" id="kpi-avg">—</div>
+          <span class="trend" id="kpi-avg-trend">—</span>
+        </div>
       </section>
 
       <section class="grid">
-        <div class="panel"><h3>Tendência de Gastos</h3><canvas id="lineChart"></canvas></div>
-        <div class="panel"><h3>Gastos por Categoria</h3><canvas id="pieChart"></canvas></div>
+        <div class="panel">
+          <h3>Tendência de Gastos</h3>
+          <canvas id="lineChart"></canvas>
+        </div>
+        <div class="panel">
+          <h3>Gastos por Categoria</h3>
+          <canvas id="pieChart"></canvas>
+        </div>
       </section>
 
       <section class="panel" style="margin-top:16px">
         <h3>Lançamentos Recentes</h3>
         <table class="table" id="tbl">
-          <thead><tr><th>Data</th><th>Veículo</th><th>Categoria</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Veículo</th>
+              <th>Categoria</th>
+              <th>Fornecedor</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
       </section>
     </main>
   </div>
-<script src="js/app.js"></script>
-<script>
-  fetch('php/me.php',{credentials:'include'})
-    .then(r=>{ if(r.status===401) location.href='index.html'; return r.json(); })
-    .then(u=>{ document.getElementById('userPill').textContent = `${u.name} • ${u.email}`; });
-  document.getElementById('logout').onclick = async ()=>{ await fetch('php/logout.php',{method:'POST',credentials:'include'}); location.href='index.html'; };
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+
+  <!-- JS DO DASHBOARD -->
+  <script src="js/app.js"></script>
+
+  <!-- Teste simples pra garantir que este HTML está carregando JS -->
+  <script>
+    console.log('inline dashboard.js OK');
+    // Verifica login ao abrir e carrega nome do usuário
+    fetch('php/me.php', { credentials: 'include' })
+      .then(r => {
+        if (r.status === 401) location.href = 'index.html';
+        return r.json();
+      })
+      .then(u => {
+        document.getElementById('userPill').textContent =
+          (u.name || 'Usuário') + ' • ' + u.email;
+      });
+
+    document.getElementById('logout').onclick = async () => {
+      await fetch('php/logout.php', { method: 'POST', credentials: 'include' });
+      location.href = 'index.html';
+    };
+  </script>
 </body>
 </html>
