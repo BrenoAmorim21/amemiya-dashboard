@@ -1,43 +1,42 @@
 <?php
-require 'db.php';
 header('Content-Type: application/json');
+require 'db.php';
 
-if (!isset($_SESSION['id_usuario'])) {
-    http_response_code(401);
-    echo json_encode(['erro' => 'Não autenticado']);
-    exit;
+if (!isset($_SESSION)) {
+    session_start();
 }
+
+// Por enquanto não filtramos por usuário; usamos todos os veículos cadastrados.
+// Se depois quisermos filtrar por organização/usuário, a gente adapta aqui.
 
 $sql = "
     SELECT
       v.id_veiculo,
       v.placa,
       v.modelo,
-      v.ano,
-      v.km_atual,
-      cc.nome AS centro_custo,
-      COALESCE(SUM(nf.valor_total),0) AS gasto_periodo
+      COALESCE(MAX(nf.km_veiculo), 0)            AS km_atual,
+      COALESCE(SUM(nf.valor_total), 0)           AS gasto_periodo,
+      MAX(nf.data_emissao)                       AS ultima_manutencao
     FROM veiculos v
-    LEFT JOIN centros_custo cc
-      ON cc.id_centro_custo = v.id_centro_custo
     LEFT JOIN notas_fiscais nf
       ON nf.id_veiculo = v.id_veiculo
-    GROUP BY
-      v.id_veiculo, v.placa, v.modelo, v.ano, v.km_atual, cc.nome
-    ORDER BY gasto_periodo DESC
+    GROUP BY v.id_veiculo, v.placa, v.modelo
+    ORDER BY v.placa
 ";
 
-$rows = $pdo->query($sql)->fetchAll();
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $saida = [];
-foreach ($rows as $r) {
+foreach ($dados as $row) {
     $saida[] = [
-        'placa'        => $r['placa'],
-        'modelo'       => $r['modelo'],
-        'ano'          => $r['ano'],
-        'km_atual'     => (int)$r['km_atual'],
-        'centro_custo' => $r['centro_custo'],
-        'gasto_periodo'=> (float)$r['gasto_periodo'],
+        'id_veiculo'        => (int)$row['id_veiculo'],
+        'placa'             => $row['placa'],
+        'modelo'            => $row['modelo'],
+        'km_atual'          => (float)$row['km_atual'],
+        'gasto_periodo'     => (float)$row['gasto_periodo'],
+        'ultima_manutencao' => $row['ultima_manutencao'],
     ];
 }
 

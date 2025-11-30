@@ -1,13 +1,22 @@
 <?php
-require 'db.php';
 header('Content-Type: application/json');
+require 'db.php';
 
-if (!isset($_SESSION['id_usuario'])) {
-    http_response_code(401);
-    echo json_encode(['erro' => 'Não autenticado']);
-    exit;
+if (!isset($_SESSION)) {
+    session_start();
 }
 
+// se quiser no futuro filtrar por usuário logado, a gente vê certinho aqui
+// por enquanto, NÃO vamos filtrar por usuário pra não quebrar nada
+
+// ---- filtros vindos da URL (GET) ----
+$q      = $_GET['q']      ?? '';
+$from   = $_GET['from']   ?? '';
+$to     = $_GET['to']     ?? '';
+$status = $_GET['status'] ?? '';
+$all    = isset($_GET['all']);   // se true, não limita a poucos registros
+
+// ---- SQL base: o SEU SELECT original ----
 $sql = "
     SELECT
       nf.id_nota,
@@ -26,12 +35,60 @@ $sql = "
       ON tm.id_tipo_manutencao = nf.id_tipo_manutencao
     LEFT JOIN fornecedores f
       ON f.id_fornecedor = nf.id_fornecedor
-    ORDER BY nf.data_emissao DESC, nf.id_nota DESC
-    LIMIT 300
 ";
 
-$dados = $pdo->query($sql)->fetchAll();
+// vamos montar o WHERE dinamicamente
+$where = [];
+$params = [];
 
+// filtro por status (APROVADA / PENDENTE / REPROVADA)
+if ($status !== '') {
+    $where[] = "nf.status = :status";
+    $params['status'] = $status;
+}
+
+// filtro por data inicial
+if ($from !== '') {
+    $where[] = "nf.data_emissao >= :from";
+    $params['from'] = $from;
+}
+
+// filtro por data final
+if ($to !== '') {
+    $where[] = "nf.data_emissao <= :to";
+    $params['to'] = $to;
+}
+
+if ($q !== '') {
+    $where[] = "(v.placa LIKE :q1 OR tm.nome LIKE :q2 OR f.nome LIKE :q3)";
+    $like = '%' . $q . '%';
+    $params['q1'] = $like;
+    $params['q2'] = $like;
+    $params['q3'] = $like;
+}
+
+// se tiver pelo menos uma condição, adiciona WHERE
+if (!empty($where)) {
+    $sql .= " WHERE " . implode(' AND ', $where);
+}
+
+// ordenação
+$sql .= " ORDER BY nf.data_emissao DESC, nf.id_nota DESC";
+
+// limite para não explodir
+if ($all) {
+    // usado na aba de Lançamentos (tabela completa)
+    $sql .= " LIMIT 300";
+} else {
+    // usado no dashboard (Lançamentos Recentes)
+    $sql .= " LIMIT 10";
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// mesma saída que você já tinha
 $saida = [];
 foreach ($dados as $row) {
     $saida[] = [

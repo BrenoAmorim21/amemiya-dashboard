@@ -27,22 +27,24 @@ body{
   background:var(--bg-1);
 }
 
-.brand{
-  display:flex; 
-  align-items:center; 
-  gap:12px; 
-  margin-bottom:22px;
+/* ===== LOGO / BRAND ===== */
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72px;             /* altura fixa da área do logo */
+  padding: 12px 8px;
 }
 
-.brand__logo{
-  width:34px; 
-  height:34px; 
-  border-radius:50%; 
-  background:#111; 
-  display:grid; 
-  place-items:center; 
-  font-weight:700;
+.brand__img {
+  max-width: 160px;         /* limita largura pra não passar do menu */
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
+
 
 .nav a{
   display:block; 
@@ -190,4 +192,314 @@ body{
   display:block; 
   margin-top:10px; 
   color:#fda4af
+}
+
+/* altura padrão dos painéis de gráfico */
+.grid .panel {
+  height: 320px;
+  max-height: 320px;
+}
+
+/* painel da pizza: mais alto e sem cortar nada */
+.panel-pie {
+  height: 420px;        /* aumenta aqui se quiser mais ainda */
+  max-height: 420px;
+  overflow: visible;    /* importante: NÃO corta o canvas */
+}
+
+/* o canvas ocupa o painel todo, mas respeita a legenda */
+.panel canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+/* ===== Abas (page-section) ===== */
+.page-section {
+  display: none;
+}
+
+.page-section.active {
+  display: block;
+}
+
+/* Alinha tabelas exatamente com os títulos */
+.page-section .panel {
+  padding-left: 20px;   /* iguala ao recuo dos títulos */
+  padding-right: 20px;
+}
+
+.page-section table {
+  margin-left: 0;    /* garante alinhamento */
+  width: calc(100% - 0px);
+}
+
+/* Painéis alinhados */
+.panel {
+  padding: 16px 24px;
+}
+
+/* Títulos dentro do painel alinhados à tabela */
+.panel h3 {
+  margin: 0 0 12px 0;
+  padding: 0;
+}
+
+/* Garante que tabelas não "grudem" na borda */
+.panel table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+
+/* Header da seção (título + botão) */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Linha de filtros da aba Lançamentos */
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filters-row .input,
+.filters-row select {
+  min-width: 150px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #a1a1aa;
+}
+
+/* reutiliza .filters-row normal, já criada antes */
+
+/* ===== RELATÓRIOS – alinhamento fino ===== */
+
+/* ======================= */
+/*  RELATÓRIOS – LAYOUT    */
+/* ======================= */
+
+#sec-relatorios {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* Títulos "Gasto por categoria" / "Gasto por veículo" */
+#sec-relatorios h3 {
+  margin: 0 0 12px 0;
+  padding: 0;
+  font-size: 18px;
+}
+
+/* Painéis da área de relatórios sem cardão pesado */
+#sec-relatorios .panel {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 8px 0 24px;
+}
+
+/* Subtítulo opcional, se tiver (ex: "Resumo de gastos...") */
+#sec-relatorios .section-header-subtitle {
+  font-size: 13px;
+  color: #a1a1aa;
+  margin-top: 4px;
+}
+
+/* ======================= */
+/*  TABELAS DE RELATÓRIO   */
+/* ======================= */
+
+#sec-relatorios .table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 0;
+}
+
+/* Cabeçalho */
+#sec-relatorios .table thead th {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e4e4e7;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Células */
+#sec-relatorios .table tbody td {
+  font-size: 13px;
+  color: #e4e4e7;
+  padding: 6px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Zebra (linhas alternadas) */
+#sec-relatorios .table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* Hover na linha */
+#sec-relatorios .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ======================= */
+/*  LARGURA & ALINHAMENTO  */
+/* ======================= */
+
+/* A primeira coluna (Categoria / Veículo) pode respirar mais */
+#sec-relatorios .table th:first-child,
+#sec-relatorios .table td:first-child {
+  min-width: 200px;
+}
+
+/* Demais colunas não podem ficar esmagadas */
+#sec-relatorios .table th:nth-child(n+2),
+#sec-relatorios .table td:nth-child(n+2) {
+  min-width: 120px;
+}
+
+/* Coluna 2 = Qtde lançamentos (centralizada) */
+#sec-relatorios .table th:nth-child(2),
+#sec-relatorios .table td:nth-child(2) {
+  text-align: center;
+}
+
+/* Colunas 3 e 4 = valores (direita) – gasto total / ticket médio */
+#sec-relatorios .table th:nth-child(3),
+#sec-relatorios .table th:nth-child(4),
+#sec-relatorios .table td:nth-child(3),
+#sec-relatorios .table td:nth-child(4) {
+  text-align: right;
+}
+
+/* Evita a tabela “colar” na borda esquerda visualmente */
+#sec-relatorios .table thead th:first-child,
+#sec-relatorios .table tbody td:first-child {
+  padding-left: 4px;
+}
+
+
+/* ======================= */
+/*        ADMIN            */
+/* ======================= */
+
+#sec-admin {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* Título + subtítulo */
+#sec-admin .section-header h2 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+#sec-admin .section-header-subtitle {
+  font-size: 13px;
+  color: #a1a1aa;
+}
+
+/* Grid de cards da área admin */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1.3fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+/* Card admin reaproveitando .panel mas mais “seco” */
+.admin-card {
+  padding: 16px 16px 12px;
+}
+
+/* Cabeçalho dentro do card (título + botão) */
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.admin-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.admin-card-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #a1a1aa;
+}
+
+/* Botão menor, para caber melhor no header */
+.btn.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Tabelas do admin – estilo mais compacto */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table thead th {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  font-weight: 500;
+  text-align: left;
+}
+
+.admin-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Zebra + hover */
+.admin-table tbody tr:nth-child(even):not(.empty-row) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.admin-table tbody tr:hover:not(.empty-row) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Linha de “nenhum cadastro ainda” */
+.admin-table .empty-row td {
+  text-align: center;
+  font-style: italic;
+  color: #a1a1aa;
+}
+
+/* Responsivo: empilha os cards em telas menores */
+@media (max-width: 1200px) {
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -11,17 +11,20 @@
 <body>
   <div class="app">
     <aside class="sidebar">
-      <div class="brand">
+      <a href="#" class="brand" id="brandHome" data-section="dashboard">
         <img src="assets/logo_amemiya.png" class="brand__img" alt="Amemiya">
-      </div>
+      </a>
+
       <nav class="nav">
-        <a class="active" href="#">Dashboard</a>
-        <a href="#">Lançamentos</a>
-        <a href="#">Veículos</a>
-        <a href="#">Relatórios</a>
-        <a href="#">Admin</a>
+        <a href="#" data-section="dashboard" class="active">Dashboard</a>
+        <a href="#" data-section="lancamentos">Lançamentos</a>
+        <a href="#" data-section="veiculos">Veículos</a>
+        <a href="#" data-section="relatorios">Relatórios</a>
+        <a href="#" data-section="admin">Admin</a>
         <a id="logout" class="logout" href="#">Sair</a>
       </nav>
+
+
       <div class="foot">© 2025 Amemiya • v0.1</div>
     </aside>
 
@@ -37,65 +40,302 @@
         <button class="btn" id="export">Exportar CSV</button>
       </div>
 
-      <section class="kpis" id="kpis">
-        <div class="card">
-          <h4>Gasto Total</h4>
-          <div class="value" id="kpi-total">—</div>
-          <span class="trend" id="kpi-total-trend">—</span>
+        <section class="page-section active" id="sec-dashboard">
+        <section class="kpis" id="kpis">
+          <div class="card">
+            <h4>Gasto Total</h4>
+            <div class="value" id="kpi-total">—</div>
+            <span class="trend" id="kpi-total-trend">—</span>
+          </div>
+          <div class="card">
+            <h4>Taxa de Aprovação</h4>
+            <div class="value" id="kpi-approve">—</div>
+            <span class="trend" id="kpi-approve-trend">—</span>
+          </div>
+          <div class="card">
+            <h4>Custo por km</h4>
+            <div class="value" id="kpi-cpkm">—</div>
+            <span class="trend" id="kpi-cpkm-trend">—</span>
+          </div>
+          <div class="card">
+            <h4>Tempo Médio p/ Aprovar</h4>
+            <div class="value" id="kpi-avg">—</div>
+            <span class="trend" id="kpi-avg-trend">—</span>
+          </div>
+        </section>
+
+        <section class="grid">
+          <div class="panel panel-line">
+            <h3>Tendência de Gastos</h3>
+            <canvas id="lineChart"></canvas>
+          </div>
+          <div class="panel panel-pie">
+            <h3>Gastos por Categoria</h3>
+            <canvas id="pieChart"></canvas>
+          </div>
+        </section>
+
+
+        <section class="panel" style="margin-top:16px">
+          <h3>Lançamentos Recentes</h3>
+          <table class="table" id="tbl">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Veículo</th>
+                <th>Categoria</th>
+                <th>Fornecedor</th>
+                <th>Valor</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </section>
+
+      <!-- SEÇÃO LANÇAMENTOS -->
+
+      <section class="page-section" id="sec-lancamentos">
+        <header class="section-header">
+          <h2>Lançamentos</h2>
+          <button class="btn btn-sm" type="button" id="btn-novo-lanc" disabled>
+            Novo lançamento (em breve)
+          </button>
+        </header>
+
+        <div class="filters-row">
+          <input id="f-q" class="input" placeholder="Buscar (veículo, fornecedor, categoria...)" />
+          <input id="f-from" type="date" class="input" />
+          <input id="f-to" type="date" class="input" />
+          <select id="f-status" class="input">
+            <option value="">Todos os status</option>
+            <option value="APROVADA">Aprovada</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="REPROVADA">Reprovada</option>
+          </select>
+          <button class="btn" id="f-apply-lanc">Aplicar filtros</button>
         </div>
-        <div class="card">
-          <h4>Taxa de Aprovação</h4>
-          <div class="value" id="kpi-approve">—</div>
-          <span class="trend" id="kpi-approve-trend">—</span>
+
+        <section class="panel">
+          <h3>Todos os lançamentos</h3>
+          <table class="table" id="tbl-lanc">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Veículo</th>
+                <th>Categoria</th>
+                <th>Fornecedor</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </section>
+
+        <!-- SEÇÃO VEÍCULOS -->
+      <section class="page-section" id="sec-veiculos">
+        <header class="section-header">
+          <h2>Veículos</h2>
+          <button class="btn btn-sm" type="button" id="btn-novo-veic" disabled>
+            Novo veículo (em breve)
+          </button>
+        </header>
+
+        <section class="panel">
+          <h3>Resumo da frota</h3>
+          <table class="table" id="tbl-veic">
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Km atual</th>
+                <th>Gasto total</th>
+                <th>Última manutenção</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </section>
+
+
+        <!-- SEÇÃO RELATÓRIOS -->
+      <section class="page-section" id="sec-relatorios">
+        <header class="section-header">
+          <h2>Relatórios</h2>
+          <span class="section-subtitle">
+            Resumo de gastos por categoria e por veículo
+          </span>
+        </header>
+
+        <div class="filters-row">
+          <input id="r-from" type="date" class="input" />
+          <input id="r-to" type="date" class="input" />
+          <select id="r-status" class="input">
+            <option value="">Todos os status</option>
+            <option value="APROVADA">Aprovada</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="REPROVADA">Reprovada</option>
+          </select>
+          <button class="btn" id="f-apply-rel">Aplicar filtros</button>
         </div>
-        <div class="card">
-          <h4>Custo por km</h4>
-          <div class="value" id="kpi-cpkm">—</div>
-          <span class="trend" id="kpi-cpkm-trend">—</span>
-        </div>
-        <div class="card">
-          <h4>Tempo Médio p/ Aprovar</h4>
-          <div class="value" id="kpi-avg">—</div>
-          <span class="trend" id="kpi-avg-trend">—</span>
+
+        <section class="panel">
+          <h3>Gasto por categoria</h3>
+          <table class="table" id="tbl-rel-cat">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Qtde lançamentos</th>
+                <th>Gasto total</th>
+                <th>Ticket médio</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <section class="panel" style="margin-top:16px">
+          <h3>Gasto por veículo</h3>
+          <table class="table" id="tbl-rel-veic">
+            <thead>
+              <tr>
+                <th>Veículo</th>
+                <th>Qtde lançamentos</th>
+                <th>Gasto total</th>
+                <th>Ticket médio</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+      </section>
+
+      <!-- === SEÇÃO ADMIN === -->
+
+      <section class="page-section" id="sec-admin">
+        <header class="section-header">
+          <div>
+            <h2>Administração</h2>
+            <p class="section-header-subtitle">
+              Cadastros e configurações do ambiente Amemiya.
+            </p>
+          </div>
+        </header>
+
+        <div class="admin-grid">
+          <!-- Painel: Veículos -->
+          <div class="panel admin-card">
+            <div class="admin-card-header">
+              <div>
+                <h3>Veículos</h3>
+                <p class="admin-card-subtitle">
+                  Gerencie a frota, placas, km e centro de custo.
+                </p>
+              </div>
+              <button class="btn btn-sm" id="btnNovoVeiculo">
+                + Novo veículo
+              </button>
+            </div>
+
+            <table class="table admin-table" id="tbl-admin-veic">
+              <thead>
+                <tr>
+                  <th>Placa</th>
+                  <th>Modelo</th>
+                  <th>Ano</th>
+                  <th>Centro de custo</th>
+                  <th>Km atual</th>
+                  <th style="width: 1%">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Linhas serão preenchidas via JS futuramente -->
+                <tr class="empty-row">
+                  <td colspan="6">Nenhum veículo cadastrado ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Painel: Fornecedores -->
+          <div class="panel admin-card">
+            <div class="admin-card-header">
+              <div>
+                <h3>Fornecedores</h3>
+                <p class="admin-card-subtitle">
+                  Oficinas, postos e parceiros de manutenção.
+                </p>
+              </div>
+              <button class="btn btn-sm" id="btnNovoFornecedor">
+                + Novo fornecedor
+              </button>
+            </div>
+
+            <table class="table admin-table" id="tbl-admin-forn">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CNPJ</th>
+                  <th>Tipo</th>
+                  <th>Telefone</th>
+                  <th style="width: 1%">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty-row">
+                  <td colspan="5">Nenhum fornecedor cadastrado ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Painel: Tipos de Manutenção -->
+          <div class="panel admin-card">
+            <div class="admin-card-header">
+              <div>
+                <h3>Tipos de manutenção</h3>
+                <p class="admin-card-subtitle">
+                  Controle dos tipos usados nas notas fiscais.
+                </p>
+              </div>
+              <button class="btn btn-sm" id="btnNovoTipoManut">
+                + Novo tipo
+              </button>
+            </div>
+
+            <table class="table admin-table" id="tbl-admin-tipos">
+              <thead>
+                <tr>
+                  <th>Nome do tipo</th>
+                  <th>Descrição</th>
+                  <th style="width: 1%">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty-row">
+                  <td colspan="3">Nenhum tipo de manutenção cadastrado ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <section class="grid">
-        <div class="panel">
-          <h3>Tendência de Gastos</h3>
-          <canvas id="lineChart"></canvas>
-        </div>
-        <div class="panel">
-          <h3>Gastos por Categoria</h3>
-          <canvas id="pieChart"></canvas>
-        </div>
-      </section>
-
-      <section class="panel" style="margin-top:16px">
-        <h3>Lançamentos Recentes</h3>
-        <table class="table" id="tbl">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Veículo</th>
-              <th>Categoria</th>
-              <th>Fornecedor</th>
-              <th>Valor</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
     </main>
   </div>
 
-  <!-- JS DO DASHBOARD -->
+    <!-- JS DO DASHBOARD (arquivo externo) -->
   <script src="js/app.js"></script>
 
-  <!-- Teste simples pra garantir que este HTML está carregando JS -->
+  <!-- Script inline só para login/logout -->
   <script>
     console.log('inline dashboard.js OK');
+
     // Verifica login ao abrir e carrega nome do usuário
     fetch('php/me.php', { credentials: 'include' })
       .then(r => {
@@ -105,6 +345,10 @@
       .then(u => {
         document.getElementById('userPill').textContent =
           (u.name || 'Usuário') + ' • ' + u.email;
+      })
+      .catch(err => {
+        console.error('Erro ao buscar me.php', err);
+        document.getElementById('userPill').textContent = 'Erro ao carregar usuário';
       });
 
     document.getElementById('logout').onclick = async () => {
@@ -114,3 +358,4 @@
   </script>
 </body>
 </html>
+
