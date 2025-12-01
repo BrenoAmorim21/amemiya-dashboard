@@ -11,6 +11,31 @@ const fmtBRL = n =>
 
 let lineChart, pieChart;
 
+// POST JSON genérico
+async function postJSON(url, data){
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    credentials: 'include',
+    body: JSON.stringify(data)
+  });
+  if (!r.ok){
+    const e = await r.json().catch(() => ({error:'Erro desconhecido'}));
+    throw new Error(e.error || 'Erro ao salvar');
+  }
+  return r.json();
+}
+
+// Modais
+function openModal(id){
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id){
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+
 // ======================
 //   DASHBOARD / MÉTRICAS
 // ======================
@@ -87,11 +112,9 @@ function renderCharts(d) {
         }]
       },
       options: {
-        maintainAspectRatio: false, // deixa o canvas ocupar o painel
+        maintainAspectRatio: false,
         layout: {
-          padding: {
-            bottom: 24 // reserva espaço pra legenda
-          }
+          padding: { bottom: 24 }
         },
         plugins: {
           legend: {
@@ -144,6 +167,7 @@ async function carregarLancamentos() {
 
 // ======================
 //   LANÇAMENTOS (aba Lançamentos - completa)
+//   + BOTÕES APROVAR / REPROVAR
 // ======================
 async function carregarLancamentosFull() {
   const tbody = document.querySelector('#tbl-lanc tbody');
@@ -179,6 +203,22 @@ async function carregarLancamentosFull() {
         ? l.obs.substring(0, 57) + '...'
         : (l.obs || '-');
 
+      // ID da nota vindo do PHP (tanto faz se for id ou id_nota)
+      const idNota = l.id ?? l.id_nota;
+
+      // ações: só mostra se estiver pendente
+      let acoesHtml = '';
+      if (l.status === 'PENDENTE' && idNota) {
+        acoesHtml = `
+          <button class="btn btn-xs btn-approve" data-id="${idNota}">
+            Aprovar
+          </button>
+          <button class="btn btn-xs btn-reject" data-id="${idNota}">
+            Reprovar
+          </button>
+        `;
+      }
+
       tr.innerHTML = `
         <td>${data}</td>
         <td>${l.veiculo || '-'}</td>
@@ -187,6 +227,7 @@ async function carregarLancamentosFull() {
         <td>${fmtBRL(l.valor)}</td>
         <td>${formatStatus(l.status)}</td>
         <td>${obs}</td>
+        <td>${acoesHtml}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -242,10 +283,6 @@ async function carregarVeiculos() {
   }
 }
 
-// ======================
-//   RELATÓRIOS (categoria + veículo)
-//   -> usa php/lancamentos.php?all=1 (mesmo endpoint antigo)
-// ======================
 async function carregarRelatorios() {
   const tbodyCat  = document.querySelector('#tbl-rel-cat tbody');
   const tbodyVeic = document.querySelector('#tbl-rel-veic tbody');
@@ -264,9 +301,16 @@ async function carregarRelatorios() {
     const url = 'php/lancamentos.php?all=1&' + params.toString();
 
     const r = await fetch(url, { credentials: 'include' });
-    if (!r.ok) return;
+    if (!r.ok) {
+      console.error('Erro HTTP em relatórios', r.status);
+      return;
+    }
 
     const dados = await r.json();
+    if (!Array.isArray(dados)) {
+      console.error('Resposta inesperada em relatórios:', dados);
+      return;
+    }
 
     // ---- agrega por categoria ----
     const porCategoria = {};
@@ -323,6 +367,138 @@ async function carregarRelatorios() {
   }
 }
 
+
+// ======================
+//   ADMIN – listar VEÍCULOS
+//   (mantive só UMA versão)
+// ======================
+async function carregarAdminVeiculos() {
+  const tbody = document.querySelector('#tbl-admin-veic tbody');
+  if (!tbody) return;
+
+  try {
+    const r = await fetch('php/admin_veiculo_listar.php', { credentials: 'include' });
+    if (!r.ok) throw new Error('Falha ao carregar veículos admin');
+
+    const dados = await r.json();
+    tbody.innerHTML = '';
+
+    if (!dados.length) {
+      tbody.innerHTML = `
+        <tr class="empty-row">
+          <td colspan="6">Nenhum veículo cadastrado ainda.</td>
+        </tr>`;
+      return;
+    }
+
+    dados.forEach(v => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${v.placa}</td>
+        <td>${v.modelo || '-'}</td>
+        <td>${v.ano || '-'}</td>
+        <td>${v.centro_custo || '-'}</td>
+        <td>${(v.km_atual ?? 0).toLocaleString('pt-BR')} km</td>
+        <td>
+          <button class="btn btn-xs" disabled>Editar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    console.error('Erro ao carregar veículos (admin):', e);
+  }
+}
+
+// ======================
+//   ADMIN – listar FORNECEDORES
+// ======================
+async function carregarAdminFornecedores() {
+  const tbody = document.querySelector('#tbl-admin-forn tbody');
+  if (!tbody) return;
+
+  try {
+    const r = await fetch('php/admin_fornecedores.php', { credentials: 'include' });
+    if (!r.ok) return;
+    const dados = await r.json();
+
+    tbody.innerHTML = '';
+
+    if (!dados.length) {
+      const tr = document.createElement('tr');
+      tr.classList.add('empty-row');
+      tr.innerHTML = `<td colspan="5">Nenhum fornecedor cadastrado ainda.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    dados.forEach(f => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${f.nome}</td>
+        <td>${f.cnpj || '-'}</td>
+        <td>${f.tipo || '-'}</td>
+        <td>${f.telefone || '-'}</td>
+        <td>
+          <button class="btn btn-xs" disabled>Editar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    console.error('Erro ao carregar fornecedores (admin)', e);
+  }
+}
+
+// ======================
+//   ADMIN – listar TIPOS DE MANUTENÇÃO
+// ======================
+async function carregarAdminTipos() {
+  const tbody = document.querySelector('#tbl-admin-tipos tbody');
+  if (!tbody) return;
+
+  try {
+    const r = await fetch('php/admin_tipos_manut.php', { credentials: 'include' });
+    if (!r.ok) return;
+    const dados = await r.json();
+
+    tbody.innerHTML = '';
+
+    if (!dados.length) {
+      const tr = document.createElement('tr');
+      tr.classList.add('empty-row');
+      tr.innerHTML = `<td colspan="3">Nenhum tipo de manutenção cadastrado ainda.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    dados.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.nome}</td>
+        <td>${t.descricao || '-'}</td>
+        <td>
+          <button class="btn btn-xs" disabled>Editar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    console.error('Erro ao carregar tipos (admin)', e);
+  }
+}
+
+// ======================
+//   ADMIN – função wrapper
+// ======================
+async function carregarAdmin() {
+  await Promise.all([
+    carregarAdminVeiculos(),
+    carregarAdminFornecedores(),
+    carregarAdminTipos()
+  ]);
+}
+
 // ======================
 //   EXPORTAR CSV (Dashboard)
 // ======================
@@ -369,7 +545,7 @@ function initNav() {
     if (sec === 'lancamentos') carregarLancamentosFull();
     if (sec === 'veiculos')    carregarVeiculos();
     if (sec === 'relatorios')  carregarRelatorios();
-    // 'admin' por enquanto só mostra o layout estático
+    if (sec === 'admin')       carregarAdmin();
   }
 
   links.forEach(link => {
@@ -422,5 +598,149 @@ document.addEventListener('DOMContentLoaded', () => {
         carregarRelatorios();
       });
     }
+
+    // === Admin: botões "Novo ..." ===
+    const btnNovoVeiculo    = document.getElementById('btnNovoVeiculo');
+    const btnNovoFornecedor = document.getElementById('btnNovoFornecedor');
+    const btnNovoTipoManut  = document.getElementById('btnNovoTipoManut');
+
+    if (btnNovoVeiculo) {
+      btnNovoVeiculo.removeAttribute('disabled');
+      btnNovoVeiculo.addEventListener('click', () => openModal('modalVeiculo'));
+    }
+    if (btnNovoFornecedor) {
+      btnNovoFornecedor.removeAttribute('disabled');
+      btnNovoFornecedor.addEventListener('click', () => openModal('modalFornecedor'));
+    }
+    if (btnNovoTipoManut) {
+      btnNovoTipoManut.removeAttribute('disabled');
+      btnNovoTipoManut.addEventListener('click', () => openModal('modalTipo'));
+    }
+
+        // ===== Ações Aprovar / Reprovar na aba Lançamentos =====
+    const tblLanc = document.getElementById('tbl-lanc');
+    if (tblLanc) {
+      tblLanc.addEventListener('click', async (e) => {
+        const target = e.target;
+
+        if (!target.classList.contains('btn-approve') &&
+            !target.classList.contains('btn-reject')) {
+          return;
+        }
+
+        const id = target.getAttribute('data-id');
+        if (!id) return;
+
+        const novoStatus = target.classList.contains('btn-approve')
+          ? 'APROVADA'
+          : 'REPROVADA';
+
+        const ok = confirm(`Confirmar marcar essa nota como ${novoStatus}?`);
+        if (!ok) return;
+
+        try {
+          await postJSON('php/lancamento_atualizar_status.php', {
+            id: Number(id),
+            status: novoStatus
+          });
+
+          // Atualiza lista de lançamentos e KPIs
+          await carregarLancamentosFull();
+          await carregarDashboard();
+        } catch (err) {
+          alert('Erro ao atualizar status: ' + err.message);
+        }
+      });
+    }
+
+
+    // Fechar modais ao clicar em "Cancelar" ou no backdrop
+    document.querySelectorAll('[data-close-modal]').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.getAttribute('data-close-modal');
+        closeModal(id);
+      });
+    });
+
+    // === SUBMIT: novo veículo ===
+    const formVeic = document.getElementById('formVeiculo');
+    if (formVeic){
+      formVeic.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const fd = new FormData(formVeic);
+        const payload = {
+          placa: (fd.get('placa') || '').trim(),
+          modelo: (fd.get('modelo') || '').trim(),
+          ano: fd.get('ano') ? Number(fd.get('ano')) : null,
+          km_atual: fd.get('km_atual') ? Number(fd.get('km_atual')) : null,
+          id_centro_custo: fd.get('id_centro_custo') ? Number(fd.get('id_centro_custo')) : null,
+        };
+        try{
+          await postJSON('php/admin_veiculo_criar.php', payload);
+          formVeic.reset();
+          closeModal('modalVeiculo');
+          carregarAdminVeiculos();
+          carregarVeiculos();
+        }catch(err){
+          alert('Erro ao salvar veículo: ' + err.message);
+        }
+      });
+    }
+
+    // === SUBMIT: novo fornecedor ===
+    const formForn = document.getElementById('formFornecedor');
+    if (formForn){
+      formForn.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const fd = new FormData(formForn);
+        const payload = {
+          nome: (fd.get('nome') || '').trim(),
+          cnpj: (fd.get('cnpj') || '').trim(),
+          tipo: (fd.get('tipo') || '').trim(),
+          telefone: (fd.get('telefone') || '').trim(),
+        };
+        try{
+          await postJSON('php/admin_fornecedor_criar.php', payload);
+          formForn.reset();
+          closeModal('modalFornecedor');
+          carregarAdminFornecedores();
+        }catch(err){
+          alert('Erro ao salvar fornecedor: ' + err.message);
+        }
+      });
+    }
+
+    // === SUBMIT: novo tipo de manutenção ===
+    const formTipo = document.getElementById('formTipo');
+    if (formTipo){
+      formTipo.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const fd = new FormData(formTipo);
+        const payload = {
+          nome: (fd.get('nome') || '').trim(),
+          descricao: (fd.get('descricao') || '').trim(),
+        };
+        try{
+          await postJSON('php/admin_tipo_criar.php', payload);
+          formTipo.reset();
+          closeModal('modalTipo');
+          carregarAdminTipos();
+        }catch(err){
+          alert('Erro ao salvar tipo: ' + err.message);
+        }
+      });
+    }
+
+    // ===== Atualização automática do dashboard a cada 15s =====
+    setInterval(() => {
+      const dashAtivo = document
+        .getElementById('sec-dashboard')
+        ?.classList.contains('active');
+
+      if (dashAtivo) {
+        carregarDashboard();
+        carregarLancamentos();
+      }
+    }, 15000);
   }
 });

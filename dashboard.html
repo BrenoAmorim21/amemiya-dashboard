@@ -119,20 +119,22 @@
 
         <section class="panel">
           <h3>Todos os lançamentos</h3>
-          <table class="table" id="tbl-lanc">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Veículo</th>
-                <th>Categoria</th>
-                <th>Fornecedor</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Observações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <table class="table" id="tbl-lanc">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Veículo</th>
+              <th>Categoria</th>
+              <th>Fornecedor</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Observações</th>
+              <th style="width:1%">Ações</th> <!-- NOVO -->
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
         </section>
       </section>
 
@@ -325,6 +327,92 @@
           </div>
         </div>
       </section>
+
+            <!-- === MODAL: NOVO VEÍCULO === -->
+      <div class="modal" id="modalVeiculo">
+        <div class="modal-backdrop" data-close-modal="modalVeiculo"></div>
+        <div class="modal-content">
+          <h3>Novo veículo</h3>
+          <form id="formVeiculo" class="modal-form">
+            <div class="form-row">
+              <label>Placa*</label>
+              <input type="text" name="placa" class="input" required maxlength="8" placeholder="ABC1D23">
+            </div>
+            <div class="form-row">
+              <label>Modelo</label>
+              <input type="text" name="modelo" class="input" placeholder="Modelo do veículo">
+            </div>
+            <div class="form-row">
+              <label>Ano</label>
+              <input type="number" name="ano" class="input" placeholder="2020">
+            </div>
+            <div class="form-row">
+              <label>Km atual</label>
+              <input type="number" name="km_atual" class="input" placeholder="0">
+            </div>
+            <div class="form-row">
+              <label>ID centro de custo</label>
+              <input type="number" name="id_centro_custo" class="input" placeholder="Opcional">
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-ghost" data-close-modal="modalVeiculo">Cancelar</button>
+              <button type="submit" class="btn">Salvar veículo</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- === MODAL: NOVO FORNECEDOR === -->
+      <div class="modal" id="modalFornecedor">
+        <div class="modal-backdrop" data-close-modal="modalFornecedor"></div>
+        <div class="modal-content">
+          <h3>Novo fornecedor</h3>
+          <form id="formFornecedor" class="modal-form">
+            <div class="form-row">
+              <label>Nome*</label>
+              <input type="text" name="nome" class="input" required placeholder="Oficina XPTO">
+            </div>
+            <div class="form-row">
+              <label>CNPJ</label>
+              <input type="text" name="cnpj" class="input" placeholder="00.000.000/0000-00">
+            </div>
+            <div class="form-row">
+              <label>Tipo</label>
+              <input type="text" name="tipo" class="input" placeholder="Oficina, Posto, etc">
+            </div>
+            <div class="form-row">
+              <label>Telefone</label>
+              <input type="text" name="telefone" class="input" placeholder="(11) 99999-9999">
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-ghost" data-close-modal="modalFornecedor">Cancelar</button>
+              <button type="submit" class="btn">Salvar fornecedor</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- === MODAL: NOVO TIPO DE MANUTENÇÃO === -->
+      <div class="modal" id="modalTipo">
+        <div class="modal-backdrop" data-close-modal="modalTipo"></div>
+        <div class="modal-content">
+          <h3>Novo tipo de manutenção</h3>
+          <form id="formTipo" class="modal-form">
+            <div class="form-row">
+              <label>Nome do tipo*</label>
+              <input type="text" name="nome" class="input" required placeholder="Troca de óleo">
+            </div>
+            <div class="form-row">
+              <label>Descrição</label>
+              <textarea name="descricao" class="input" rows="3" placeholder="Detalhes do tipo de manutenção (opcional)"></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-ghost" data-close-modal="modalTipo">Cancelar</button>
+              <button type="submit" class="btn">Salvar tipo</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
     </main>
   </div>
